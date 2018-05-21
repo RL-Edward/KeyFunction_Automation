@@ -1,0 +1,45 @@
+import pyautogui
+import keyboard
+import time
+import json
+
+class StateMachine:
+    def __init__(self):
+        self.set_instructions()
+
+    def listen_to_key(self):
+        return keyboard.read_key()
+
+    def set_instructions(self):
+        try:
+            with open('instructions.json') as file:
+                self.instructions = json.load(file)
+        except:
+            pyautogui.alert(text='Could not find instructions.json, program is now closing.', title='Key Function Automation', button='OK')
+            raise SystemExit
+
+    def parse_key_event(self, event):
+        strings = repr(event).split()
+        tgt_string = strings[0]
+        key = tgt_string.replace("KeyboardEvent(", '')
+        return key
+
+    def run(self):
+        key_detected = self.listen_to_key()
+        self.key = self.parse_key_event(key_detected)
+        if self.key == "f12":
+            pyautogui.alert(text='Program is closing.', title='Key Function Automation', button='OK')
+            return False
+        instruction = self.instructions.get(self.key)
+        if instruction != None:
+            pyautogui.typewrite(instruction)
+        else:
+            pass
+        return True
+
+ourStateMachine = StateMachine()
+
+conditional = True
+while conditional != False:
+    conditional = ourStateMachine.run()
+    time.sleep(.3)
